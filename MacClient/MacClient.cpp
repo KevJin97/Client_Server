@@ -5,13 +5,13 @@
 #include <netinet/in.h>
 #include <string.h>
 #include <arpa/inet.h>
-
+#include "cursordata.hpp"
 
 #define PORT 42069
 
 int main(int argc, char const *argv[])
 {
-	int sock = 0, valread;
+	int sock = 0, serverReturn;
 	struct sockaddr_in serv_addr;
 	char buffer[512] = {0};
 	char hello[] = "Hello from client";
@@ -36,10 +36,20 @@ int main(int argc, char const *argv[])
 		printf("\n Connection Failed \n");
 		return -1;
 	}
-	send(sock,hello,strlen(hello),0);
-	printf("Hello message sent\n");
-	valread = read(sock,buffer,512);
-	printf("%s \n",buffer);
+	for(;;)
+	{
+	
+		Coordinates data = mousecoordinate();
+		char coor[3] = {data.x, data.y, NULL};
+		if (data.x < 0)
+		{
+			break;
+		}
+		send(sock,coor, 512,0);
+		printf("Sent: %d, %d\n", coor[0], coor[1]);
+		//printf("int: %d, %d\n", data.x, data.y);
+		printf("%s",buffer);
+	}
 	return 0;
 }
 
