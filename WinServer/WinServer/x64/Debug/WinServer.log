@@ -1,2 +1,4 @@
 ﻿  main.cpp
+C:\Users\Jin\source\repos\WinServer\WinServer\main.cpp(129,19): warning C4244: '*=': conversion from 'double' to 'int', possible loss of data
+C:\Users\Jin\source\repos\WinServer\WinServer\main.cpp(130,20): warning C4244: '*=': conversion from 'double' to 'int', possible loss of data
   WinServer.vcxproj -> C:\Users\Jin\source\repos\WinServer\x64\Debug\WinServer.exe

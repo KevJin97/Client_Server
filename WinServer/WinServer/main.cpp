@@ -1,4 +1,4 @@
-#undef UNICODE
+//#undef UNICODE
 
 #define WIN32_LEAN_AND_MEAN
 
@@ -7,6 +7,7 @@
 #include <ws2tcpip.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 //link with Ws2_32.lib
 #pragma comment (lib, "Ws2_32.lib")
@@ -14,6 +15,8 @@
 
 #define DEFAULT_BUFLEN 512
 #define DEFAULT_PORT "42069"
+
+void LeftClick();
 
 int __cdecl main()
 {
@@ -34,7 +37,7 @@ int __cdecl main()
 	iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
 	if (iResult != 0)
 	{
-		printf("WSAStartup failed with eerror: %d\n", iResult);
+		printf("WSAStartup failed with error: %d\n", iResult);
 		return 1;
 	}
 
@@ -99,6 +102,7 @@ int __cdecl main()
 	closesocket(ListenSocket);
 
 	//receive until peer shuts down connection
+	int prev[2] = { -1, -1 };
 	do
 	{
 		iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
@@ -115,7 +119,25 @@ int __cdecl main()
 				WSACleanup();
 				return 1;
 			}
-			printf("Bytes sent: %d\n", iSendResult);
+			printf("Bytes sent: %d\n", iSendResult);	//coordinate
+			
+			int coor[2] = { (int)recvbuf[0], (int)recvbuf[1] };
+			if (coor[0] >= -127 && coor[0] <= -51)	// DUMBASS FIX	---------------------------SERIOUSLY FIX THIS SHIT LATER
+			{
+				coor[0] += 254;
+			}
+			coor[0] *= 7.55;
+			coor[1] *= 13.69;
+			SetCursorPos(coor[0], coor[1]);
+			if (coor[0] == prev[0] && coor[1] == prev[1])
+			{
+				LeftClick();
+			}
+			//memory---------------------------------BAD DOUBLE CLICK IMPLEMENTATION
+			prev[0] = coor[0];
+			prev[1] = coor[1];
+
+			printf("set cursor: %d, %d\n", coor[0], coor[1]);
 		}
 		else if (iResult == 0)
 		{
@@ -144,4 +166,19 @@ int __cdecl main()
 	WSACleanup();
 
 	return 0;
+}
+
+void LeftClick()
+{
+	INPUT    Input = { 0 };
+	// left down 
+	Input.type = INPUT_MOUSE;
+	Input.mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+	::SendInput(1, &Input, sizeof(INPUT));
+
+	// left up
+	::ZeroMemory(&Input, sizeof(INPUT));
+	Input.type = INPUT_MOUSE;
+	Input.mi.dwFlags = MOUSEEVENTF_LEFTUP;
+	::SendInput(1, &Input, sizeof(INPUT));
 }
